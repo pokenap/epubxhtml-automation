@@ -1,33 +1,33 @@
 [source]
 url_root = "" #"https://www.wikipedia.org/"
 url_path = "" #"/wiki/RAAF_area_commands"
-file_path = './Source/GT 1/source.html' #"./Source/Volume 1/source.html"
+file_path = "" #"./Source/Volume 1/source.html"
 
 [download]
-images = "Images"
-images_sub = "GT 1"
-source = "Source"
-source_sub = "GT 1"
-source_name = "source.html"
+images = ""
+image_sub = ""
+source = ""
+source_sub = ""
+source_name = ""
 user_agent = "{'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'}"
 download_images = false
 
 [create]
-folder = "xhtml"
-index_offset = 1
-name = "Section"
+folder = ""
+index_offset = 0
+name = ""
 
 [info]
-title = "Toaru GT 1"
+title = ""
 
 [regex]
-patterns = ['Chapter\s[0-9]', 'Part\s[0-9]', 'Between\sthe\sLines\s'] #['Chapter\s[0-9]', 'Part\s[0-9]']
+patterns = [] #['Chapter\s[0-9]', 'Part\s[0-9]']
 
 [html]
-start = '<h2><span id="Prologue'
-end = '<table'
-image = '<figure'
-identifiers = ['id="Prologue', 'id="Epilogue', 'id="Afterword', 'id="Epilogue', 'id="Ending'] #['id="Prologue', 'id="Epilogue']
+start = ''
+end = ''
+image = ''
+identifiers = [] #['id=\"Prologue', 'id=\"Epilogue']
 start_idx = 0
 end_idx = 0
 use_idx = false
