@@ -58,20 +58,28 @@ def main():
 
     
 
-    partRegex = r"{Part}\s[0-9]"
-    chapterRegex = r'{Chapter}\s[0-9]'
+    partRegex = r"Part\s[0-9]"
+    chapterRegex = r'Chapter\s[0-9]'
     betweentheLinexRegex = r'Between\sthe\sLines\s'
 
     #Main text parse loop
     with open(pathOriginal, 'r', encoding='utf-8') as source:
-        for line in source:
+        enumerated = enumerate(source)
+
+        for idx, line in enumerated:
+            if line.find('<p><br>') >= 0 or line is None:
+                startingLine = idx + 2
+                break
+        print(startingLine)
+        for idx, line in enumerated:
+            if idx < startingLine:
+                continue
             if re.search(chapterRegex, line):
                 newFile()
                 with open(currentFilePath, 'a', encoding='utf-8') as output:
                     names = TextEditing.chapterNameParser(TextEditing.htmlElementRemover(line), separators=[':', '—'])
                     text = epub.xhtmlChapterPage(names[0], names[1:], title)
                     output.write(text)
-                newFile()
             elif line.find('id=\"Prologue') != -1 or line.find('id=\"Epilogue') != -1 or line.find('id=\"Afterword') != -1 or line.find('id=\"Ending\"') != -1:
                 newFile()
                 with open(currentFilePath, 'a', encoding='utf-8') as output:
@@ -82,12 +90,7 @@ def main():
                 with open(currentFilePath, 'a', encoding='utf-8') as output:
                     text = epub.xhtmlStart(title)
                     output.write(text)              
-            elif re.search(partRegex, line):
-                with open(currentFilePath, 'a', encoding='utf-8') as output:
-                    heading = TextEditing.htmlElementRemover(line)
-                    text = epub.xhtmlPageHeading(heading, title)
-                    output.write(text)
-            elif re.search(betweentheLinexRegex, line):
+            elif re.search(partRegex, line) or re.search(betweentheLinexRegex, line):
                 newFile()
                 with open(currentFilePath, 'a', encoding='utf-8') as output:
                     heading = TextEditing.htmlElementRemover(line)

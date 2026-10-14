@@ -52,7 +52,7 @@ def xhtmlChapterPage(chapterName:str, chapterSubNames:list[str], title="", toc:i
     return xhtmlStart(title) + chapterText + xhtmlEnd()
 
 def xhtmlPageHeading(heading:str, title="", toc:int=2):
-    """Generates a heading for a page. Used for chapter title on same page as text.
+    """Generates a heading for a page. Used for chapter title on same page as text
     Takes the heading text.
     Takes an optional title of book as an argument.
     Takes an optional Table of Contents id number.
