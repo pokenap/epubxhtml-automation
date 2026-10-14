@@ -20,9 +20,8 @@ def htmlElementRemover(line:str):
 
     return output
 
-def download():
+def download(url):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'}
-    url = 'https://www.baka-tsuki.org/project/index.php?title=Toaru_Majutsu_no_Index:GT_Volume1'
     with open('source.html', 'wb') as file:
         response = requests.get(url, headers=headers)
         file.write(response.content)
@@ -90,15 +89,12 @@ def openFile(path):
         for idx, line in enumerated:
             print(idx)
 
-text = '''<figure class="mw-default-size" typeof="mw:File/Thumb"><a href="/project/index.php?title=File:GT_Index_v01_032.jpg" class="mw-file-description"><img src="/project/thu
-'''
 
 #print(htmlElementRemover(text))
 
 
 #print(nameFromUrl(imageUrlFinder(text)))
 
-#downloadImage('https://www.baka-tsuki.org/project/index.php?title=File:GT_Index_v01_032.jpg')
 
 openFile('./Source/GT 1/source.html')
 
