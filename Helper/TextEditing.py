@@ -39,8 +39,8 @@ def chapterNameParser(line:str, separators:list[str]=[':']):
 
     return names
 
-def imageUrlFinder(line:str):
-    startingIdx = line.find('href=')
+def imageUrlFinder(line:str, start:int=0):
+    startingIdx = line.find('href=', start)
     readingUrl = False
     lastChar = ''
     output = ''
