@@ -26,17 +26,6 @@ def main():
     with open('config.toml', 'r') as configFile:
         config = toml.load(configFile)
 
-    if args.path is None and args.url is None:
-        print('Provide either a url or a text path')
-        sys.exit()
-    elif args.path and args.url:
-        print('Provide only one of a url or a text path')
-        sys.exit()
-
-    if args.dlimages and args.url is None:
-        print('A url is needed to download images')
-        sys.exit()
-
     #Globals
     #Path to text file containing novel text.
     pathOriginal = args.path if args.path else config['source']['file_path']
@@ -50,9 +39,7 @@ def main():
     fullUrl = urlRoot + urlPath
 
     #Regex patterns
-    partRegex = r"Part\s[0-9]"
-    chapterRegex = r'Chapter\s[0-9]'
-    betweentheLinexRegex = r'Between\sthe\sLines\s'
+    patterns = config['regex']['patterns']
 
     #Html identifiers
     identifiers = config['html']['identifiers']
@@ -69,23 +56,28 @@ def main():
     
     #Starting index for xhtml files (Number of last premade file)
     fileNameFolder = config['create']['folder']
-    fileNameIndex = config['create']['offset']
+    fileNameIndex = config['create']['index_offset']
     fileNameTemplate = config['create']['name']
     fileType = '.xhtml'
 
     #File path of file being written to
-    currentFilePath = fileNameFolder + fileNameTemplate + f'{fileNameIndex:04}' + fileType
+    currentFilePath = './' + fileNameFolder + '/' + fileNameTemplate + f'{fileNameIndex:04}' + fileType
 
     #Source download location
     sourceMainFolder = config['download']['source']
     sourceFolder = config['download']['source_sub']
-    sourcePath = sourceMainFolder + sourceFolder
+    sourcePath = sourceMainFolder + '/' + sourceFolder
 
     
     #Image download location
-    imageMainFolder = config['download']['image']
-    imageFolder = config['download']['image_sub']
-    imagePath = imageMainFolder + imageFolder
+    imageMainFolder = config['download']['images']
+    imageFolder = config['download']['images_sub']
+    imagePath = imageMainFolder + '/' + imageFolder
+
+    #Sanity checks
+    if not fullUrl and not pathOriginal:
+        print('Program needs at least either a url or path to source file.')
+        sys.exit()
 
     #Create directories if they do not exist
     try:
@@ -108,6 +100,12 @@ def main():
     except :
         print('Image directory already exists')    
 
+    try:
+        os.mkdir('./' + fileNameFolder)
+    except:
+        print('Output directory already exists') 
+
+
     #Source download
     headers = config['download']['user_agent'] 
     sourceName = config['download']['source_name']
@@ -128,7 +126,7 @@ def main():
         nonlocal currentFilePath
         nonlocal fileNameIndex
         fileNameIndex += 1
-        currentFilePath = fileNameFolder + fileNameTemplate + f'{fileNameIndex:04}' + fileType
+        currentFilePath = './' + fileNameFolder + '/' + fileNameTemplate + f'{fileNameIndex:04}' + fileType
 
     def newFile():
         writeCurrentQueue()
@@ -138,6 +136,7 @@ def main():
     
     def writeCurrentQueue():
         nonlocal linesList
+        nonlocal afterImage
         if linesList:
             with open(currentFilePath, 'a', encoding='utf-8') as output:
                 if afterImage:
@@ -171,6 +170,7 @@ def main():
             file.write(response.content)
 
     def handleSamePageHeader(line):
+        nonlocal afterImage
         newFile()
         with open(currentFilePath, 'a', encoding='utf-8') as output:
             heading = TextEditing.htmlElementRemover(line)
@@ -180,6 +180,7 @@ def main():
             afterImage = False
 
     def handleSeparatePageHeader(line):
+        nonlocal afterImage
         newFile()
         with open(currentFilePath, 'a', encoding='utf-8') as output:
             names = TextEditing.chapterNameParser(TextEditing.htmlElementRemover(line), separators=[':', '–'])
@@ -189,6 +190,7 @@ def main():
             afterImage = False
 
     def handleNoHeaderPage():
+        nonlocal afterImage
         newFile()
         with open(currentFilePath, 'a', encoding='utf-8') as output:
             text = epub.xhtmlStart(title)
@@ -197,6 +199,7 @@ def main():
             afterImage = False
 
     def handleImagePage(line):
+        nonlocal afterImage
         if fullUrl and downloadImages:
             imageUrl = urlRoot + TextEditing.imageUrlFinder(line)
             downloadImage(imageUrl)
@@ -224,21 +227,21 @@ def main():
         for idx, line in enumerate(source):
             if idx < startingLine:
                 continue
-            if idx > endIdx:
-                break
-
+            if useStartEndIndices:
+                if idx > endIdx:
+                    break
             if any(line.find(i) != -1 for i in identifiers):
                 if chapterOnDifPage:
                     handleSeparatePageHeader(line)
                     handleNoHeaderPage()
                 else:
                     handleSamePageHeader(line)
-            elif re.search(chapterRegex, line):
+            elif re.search(patterns[0], line):
                 if chapterOnDifPage:
                     handleSeparatePageHeader(line)
                 else:
                     handleSamePageHeader(line)
-            elif re.search(partRegex, line):
+            elif any(re.search(i, line) for i in patterns[1:]):
                 handleSamePageHeader(line)
             elif line.find(htmlImage) != -1:
                 handleImagePage(line)
