@@ -1,0 +1,45 @@
+[source]
+url_root = "" #"https://www.wikipedia.org/"
+url_path = "" #"/wiki/RAAF_area_commands"
+file_path = "" #"./Source/Volume 1/source.html"
+
+[download]
+images = ""
+image_sub = ""
+source = ""
+source_sub = ""
+source_name = ""
+user_agent = "{'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'}"
+download_images = false
+
+[create]
+folder = ""
+index_offset = 0
+name = ""
+
+[info]
+title = ""
+
+[regex]
+patterns = [] #['Chapter\s[0-9]', 'Part\s[0-9]']
+
+[html]
+start = ''
+end = ''
+image = ''
+identifiers = [] #['id=\"Prologue', 'id=\"Epilogue']
+start_idx = 0
+end_idx = 0
+use_idx = false
+
+[xhtml]
+chapter_on_dif_page = true
+
+
+
+
+
+
+
+
+
