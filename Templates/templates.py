@@ -51,10 +51,9 @@ def xhtmlChapterPage(chapterName:str, chapterSubNames:list[str], title="", toc:i
 
     return xhtmlStart(title) + chapterText + xhtmlEnd()
 
-def xhtmlPageHeading(heading:str, title="", toc:int=2):
+def xhtmlPageHeading(heading:str, toc:int=2):
     """Generates a heading for a page. Used for chapter title on same page as text
     Takes the heading text.
-    Takes an optional title of book as an argument.
     Takes an optional Table of Contents id number.
     """
 
@@ -64,7 +63,7 @@ def xhtmlPageHeading(heading:str, title="", toc:int=2):
         processed = heading.replace('Part ', '')
     headingText = f'<h2 class="block_9" id="toc_id_{toc}">{processed}</h2>\n'
 
-    return xhtmlStart(title) + headingText
+    return headingText
 
 def xhtmlBody(bodyArr:Lines):
     """Generates xhtml body text using an array of strings."""
