@@ -6,7 +6,7 @@ def htmlElementRemover(line:str):
     lastChar = ''
     output = ''
     for char in line:
-        if (lastChar == '>' and char != '<'):
+        if lastChar == '>' and char != '<':
             readingText = True
         
         if readingText and char == '<':
@@ -38,3 +38,36 @@ def chapterNameParser(line:str, separators:list[str]=[':']):
     names.append(currentName)          
 
     return names
+
+def imageUrlFinder(line:str, start:int=0):
+    startingIdx = line.find('href=', start)
+    readingUrl = False
+    lastChar = ''
+    output = ''
+    for idx, char in enumerate(line):
+        if idx < startingIdx:
+            continue
+
+        if lastChar == '\"' and char != '\"':
+            readingUrl = True
+
+        if readingUrl and char == '\"':
+            readingUrl = False
+            break
+
+        if readingUrl:
+            output = output + char
+
+        lastChar = char
+
+    return output 
+
+def nameFromUrl(line:str):
+    startingIdx = line.find('File:') + len('File:')
+    output = ''
+    for idx, char in enumerate(line):
+        if idx < startingIdx:
+            continue
+        output = output + char
+
+    return output 

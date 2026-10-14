@@ -58,7 +58,11 @@ def xhtmlPageHeading(heading:str, title="", toc:int=2):
     Takes an optional Table of Contents id number.
     """
 
-    headingText = f'<h2 class="block_9" id="toc_id_{toc}">{heading}</h2>'
+    processed = heading
+
+    if heading.find('Part ') != -1:
+        processed = heading.replace('Part ', '')
+    headingText = f'<h2 class="block_9" id="toc_id_{toc}">{processed}</h2>\n'
 
     return xhtmlStart(title) + headingText
 
@@ -73,3 +77,10 @@ def xhtmlBody(bodyArr:Lines):
         output = output + prefix + line + suffix
 
     return output
+
+def xhtmlImage(name:str,title=""):
+    imageText = f'''<h2 class="block_9" id="toc_id_3"></h2>
+        <p class="block_"><img src="../Images/{name}" alt="Image" class="calibre1"/></p>
+        '''
+    
+    return xhtmlStart(title) + imageText + xhtmlEnd()
