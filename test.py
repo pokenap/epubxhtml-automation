@@ -1,3 +1,4 @@
+import requests
 def htmlElementRemover(line:str):
     readingText = False
     lastChar = ''
@@ -17,10 +18,61 @@ def htmlElementRemover(line:str):
 
     return output
 
-text = '''<h2><span id="Prologue:_At_an_Early_Christmas_Eve_Intersection_.E2.80.93_Prepare_for_Xmas_Eve.21"></span><span class="mw-headline" id="Prologue:_At_an_Early_Christmas_Eve_Intersection_–_Prepare_for_Xmas_Eve!">Prologue: At an Early Christmas Eve Intersection – Prepare_for_Xmas_Eve!</span><span class="mw-editsection"><span class="mw-editsection-bracket">[</span><a href="https://www.baka-tsuki.org/project/index.php?title=Toaru_Majutsu_no_Index:GT_Volume1_Prologue&amp;action=edit&amp;section=T-1" title="Edit section: Prologue: At an Early Christmas Eve Intersection – Prepare_for_Xmas_Eve!"><span>edit</span></a><span class="mw-editsection-bracket">]</span></span></h2>
+def download():
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'}
+    url = 'https://www.baka-tsuki.org/project/index.php?title=Toaru_Majutsu_no_Index:GT_Volume1'
+    with open('source.html', 'wb') as file:
+        response = requests.get(url, headers=headers)
+        file.write(response.content)
+        print(response.ok)
+
+def imageUrlFinder(line:str):
+    startingIdx = line.find('href=')
+    readingUrl = False
+    lastChar = ''
+    output = ''
+    for idx, char in enumerate(line):
+        if idx < startingIdx:
+            continue
+
+        if lastChar == '\"' and char != '\"':
+            readingUrl = True
+
+        if readingUrl and char == '\"':
+            readingUrl = False
+            break
+
+        if readingUrl:
+            output = output + char
+
+        lastChar = char
+
+    return output 
+
+def nameFromUrl(line:str):
+    startingIdx = line.find('File:') + len('File:')
+    output = ''
+    for idx, char in enumerate(line):
+        if idx < startingIdx:
+            continue
+        output = output + char
+
+    return output 
+
+def downloadImage(url:str):
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'}
+    imageName = nameFromUrl(url)
+    with open(imageName, 'wb') as file:
+        response = requests.get(url, headers=headers)
+        file.write(response.content)
+
+text = '''<figure class="mw-default-size" typeof="mw:File/Thumb"><a href="/project/index.php?title=File:GT_Index_v01_032.jpg" class="mw-file-description"><img src="/project/thu
 '''
 
-print(htmlElementRemover(text))
+#print(htmlElementRemover(text))
 
-if text.find('open'):
-    print('open')
+
+#print(nameFromUrl(imageUrlFinder(text)))
+
+downloadImage('https://www.baka-tsuki.org/project/index.php?title=File:GT_Index_v01_032.jpg')
+

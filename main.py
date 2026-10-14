@@ -1,5 +1,8 @@
 import argparse
+import os
 import re
+import requests
+import sys
 import Templates.templates as epub
 import Helper.TextEditing as TextEditing
             
@@ -11,10 +14,18 @@ def main():
                         description="Creates xhtml files for epub use"
     )
 
-    parser.add_argument('path', help='path of source text')
+    parser.add_argument('--url', help='path of source')
+    parser.add_argument('--path', help='path of source text')
     parser.add_argument('--title', help='book title')
 
     args = parser.parse_args()
+
+    if args.path is None and args.url is None:
+        print('Provide either a url or a text path')
+        sys.exit()
+    elif args.path and args.url:
+        print('Provide only one of a url or a text path')
+        sys.exit()
 
     #Globals
     #Path to text file containing novel text.
@@ -29,8 +40,51 @@ def main():
     fileNameTemplate = 'Section'
     fileType = '.xhtml'
 
+    
+
     #File path of file being written to
     currentFilePath = fileNameFolder + fileNameTemplate + f'{fileNameIndex:04}' + fileType
+
+    #Source download location
+    sourceMainFolder = './Source'
+    sourceFolder = '/GT 1'
+    sourcePath = sourceMainFolder + sourceFolder
+
+    try:
+        os.mkdir(sourceMainFolder)
+    except:
+        print('Main source directory already exists')
+
+    try:
+        os.mkdir(sourcePath)
+    except:
+        print('Source directory already exists')
+
+    #Image download location
+    imageMainFolder = './Images'
+    imageFolder = '/GT 1'
+    imagePath = imageMainFolder + imageFolder
+
+    try:
+        os.mkdir(imageMainFolder)
+    except :
+        print('Main image directory already exists')
+
+    try:
+        os.mkdir(imagePath)
+    except :
+        print('Image directory already exists')    
+
+    #Source download
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36'}
+
+    if pathOriginal is None:
+        url = args.url
+        with open(sourcePath + '/source.html', 'wb') as file:
+            response = requests.get(url, headers=headers)
+            file.write(response.content)
+        pathOriginal = sourcePath + '/source.html'
+    
 
     linesList = []
     
@@ -55,8 +109,13 @@ def main():
                 output.write(text)
             linesList.clear()
 
+    def downloadImage(url:str):
+        imageName = '/' + TextEditing.nameFromUrl(url)
+        print(imageName)
+        with open(imagePath + imageName, 'wb') as file:
+            response = requests.get(url, headers=headers)
+            file.write(response.content)
 
-    
 
     partRegex = r"Part\s[0-9]"
     chapterRegex = r'Chapter\s[0-9]'
@@ -70,7 +129,7 @@ def main():
             if line.find('<p><br>') >= 0 or line is None:
                 startingLine = idx + 2
                 break
-        print(startingLine)
+    
         for idx, line in enumerated:
             if idx < startingLine:
                 continue
@@ -99,6 +158,13 @@ def main():
             elif line.find('<table') != -1:
                 writeCurrentQueue()
                 break
+            elif line.find('<figure') != -1:
+                url = args.url[:25] + TextEditing.imageUrlFinder(line)
+                downloadImage(url)
+                newFile()
+                with open(currentFilePath, 'a', encoding='utf-8') as output:
+                    text = epub.xhtmlImage(TextEditing.nameFromUrl(url))
+                    output.write(text)
             else:
                 linesList.append(line)
 

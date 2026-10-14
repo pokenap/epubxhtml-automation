@@ -73,3 +73,10 @@ def xhtmlBody(bodyArr:Lines):
         output = output + prefix + line + suffix
 
     return output
+
+def xhtmlImage(name:str,title=""):
+    imageText = f'''<h2 class="block_9" id="toc_id_3"></h2>
+        <p class="block_"><img src="../Images/{name}" alt="Image" class="calibre1"/></p>
+        '''
+    
+    return xhtmlStart(title) + imageText + xhtmlEnd()
