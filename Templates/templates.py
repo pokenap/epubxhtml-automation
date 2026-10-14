@@ -67,7 +67,7 @@ def xhtmlBody(bodyArr:Lines):
     output = ""
 
     prefix = r'<p class="block_5">'
-    suffix = r'</p>\n'
+    suffix = r'</p>'
 
     for line in bodyArr:
         output = output + prefix + line + suffix

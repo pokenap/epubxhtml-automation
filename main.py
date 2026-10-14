@@ -1,47 +1,7 @@
 import argparse
 import re
 import Templates.templates as epub
-
-def htmlElementRemover(line:str):
-    readingText = False
-    lastChar = ''
-    output = ''
-    for char in line:
-        if (lastChar == '>' and char != '<'):
-            readingText = True
-        
-        if readingText and char == '<':
-            readingText = False
-            break
-        
-        if readingText:
-            output = output + char
-
-        lastChar = char
-
-    return output
-
-def chapterNameParser(line:str, separators:list[str]=[':']):
-    names = []
-    currentName = ''
-    separatorIdx = 0
-
-    for char in line:
-        if separatorIdx < len(separators):
-            if char == separators[separatorIdx]:
-                names.append(currentName)
-                currentName = ''
-                separatorIdx += 1
-            else:
-                currentName = currentName + char 
-        else:
-            currentName = currentName + char 
-    names.append(currentName)          
-
-    return names
-        
-
-
+import Helper.TextEditing as TextEditing
             
 def main():
     #Initialization
@@ -56,36 +16,89 @@ def main():
 
     args = parser.parse_args()
 
+    #Globals
     #Path to text file containing novel text.
     pathOriginal = args.path
 
     #Title to be added into xhtml header
     title = args.title
-    
+
     #Starting index for xhtml files (Number of last premade file)
-    fileNameStartingIndex = 6
-    fileNameIndex = fileNameStartingIndex
+    fileNameFolder = './xhtml/'
+    fileNameIndex = 6
     fileNameTemplate = 'Section'
     fileType = '.xhtml'
-    currentFilePath = './xhtml/' + fileNameTemplate + f'{fileNameIndex:04}' + fileType
+
+    #File path of file being written to
+    currentFilePath = fileNameFolder + fileNameTemplate + f'{fileNameIndex:04}' + fileType
+
+    linesList = []
+    
+    #Helper Methods
+    def filePathUpdate():
+        nonlocal currentFilePath
+        nonlocal fileNameIndex
+        fileNameIndex += 1
+        currentFilePath = fileNameFolder + fileNameTemplate + f'{fileNameIndex:04}' + fileType
+
+    def newFile():
+        writeCurrentQueue()
+        filePathUpdate()
+        with open(currentFilePath, 'x'):
+            pass
+    
+    def writeCurrentQueue():
+        nonlocal linesList
+        if linesList:
+            with open(currentFilePath, 'a', encoding='utf-8') as output:
+                text = epub.xhtmlBody(linesList)
+                output.write(text)
+            linesList.clear()
+
+
+    
 
     partRegex = r"{Part}\s[0-9]"
     chapterRegex = r'{Chapter}\s[0-9]'
-    betweentheLinexRegex = r'{Between\sthe\sLines\s}[0-9]'
-
-    with open(currentFilePath, 'x'):
-        pass
+    betweentheLinexRegex = r'Between\sthe\sLines\s'
 
     #Main text parse loop
     with open(pathOriginal, 'r', encoding='utf-8') as source:
         for line in source:
-            if line.find('Prologue') != -1 or line.find('Epilogue') != -1 or line.find('Afterword') != -1  or re.search(chapterRegex, line):
-                with open(currentFilePath, 'a') as output:
-                    names = chapterNameParser(htmlElementRemover(line), separators=[':', '–'])
+            if re.search(chapterRegex, line):
+                newFile()
+                with open(currentFilePath, 'a', encoding='utf-8') as output:
+                    names = TextEditing.chapterNameParser(TextEditing.htmlElementRemover(line), separators=[':', '—'])
                     text = epub.xhtmlChapterPage(names[0], names[1:], title)
                     output.write(text)
+                newFile()
+            elif line.find('id=\"Prologue') != -1 or line.find('id=\"Epilogue') != -1 or line.find('id=\"Afterword') != -1 or line.find('id=\"Ending\"') != -1:
+                newFile()
+                with open(currentFilePath, 'a', encoding='utf-8') as output:
+                    names = TextEditing.chapterNameParser(TextEditing.htmlElementRemover(line), separators=[':', '—'])
+                    text = epub.xhtmlChapterPage(names[0], names[1:], title)
+                    output.write(text)
+                newFile()
+                with open(currentFilePath, 'a', encoding='utf-8') as output:
+                    text = epub.xhtmlStart(title)
+                    output.write(text)              
+            elif re.search(partRegex, line):
+                with open(currentFilePath, 'a', encoding='utf-8') as output:
+                    heading = TextEditing.htmlElementRemover(line)
+                    text = epub.xhtmlPageHeading(heading, title)
+                    output.write(text)
+            elif re.search(betweentheLinexRegex, line):
+                newFile()
+                with open(currentFilePath, 'a', encoding='utf-8') as output:
+                    heading = TextEditing.htmlElementRemover(line)
+                    text = epub.xhtmlPageHeading(heading, title)
+                    output.write(text)
+            elif line.find('<table') != -1:
+                writeCurrentQueue()
+                break
             else:
-                pass
+                linesList.append(line)
+
 
 
 
