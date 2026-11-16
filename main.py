@@ -112,13 +112,13 @@ def main():
 
 
     #Source download
-    headersArg = ast.literal_eval(config['download']['user_agent'])
+    headers = ast.literal_eval(config['download']['user_agent'])
     sourceName = config['download']['source_name']
     sourceFullPath = sourcePath + '/' + sourceName
 
     if pathOriginal is None or pathOriginal == '':
         with open(sourceFullPath, 'wb') as file:
-            response = requests.get(fullUrl, headers=headersArg)
+            response = requests.get(fullUrl, headers=headers)
             file.write(response.content)
         pathOriginal = sourceFullPath
 
