@@ -2,6 +2,7 @@
 The program's variables can be modified through the config.toml in the main directory.
 """
 
+import ast
 import argparse
 import os
 import re
@@ -111,13 +112,13 @@ def main():
 
 
     #Source download
-    headers = config['download']['user_agent'] 
+    headersArg = ast.literal_eval(config['download']['user_agent'])
     sourceName = config['download']['source_name']
     sourceFullPath = sourcePath + '/' + sourceName
 
-    if pathOriginal is None:
+    if pathOriginal is None or pathOriginal == '':
         with open(sourceFullPath, 'wb') as file:
-            response = requests.get(fullUrl, headers=headers)
+            response = requests.get(fullUrl, headers=headersArg)
             file.write(response.content)
         pathOriginal = sourceFullPath
 
