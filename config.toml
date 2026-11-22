@@ -36,6 +36,7 @@ use_idx = false
 chapter_on_dif_page = true
 cover_count = 0
 generate_cover = true
+image_names = [] #["Image.jpg, "Image.png"]
 
 
 
