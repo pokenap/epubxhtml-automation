@@ -54,10 +54,15 @@ def main():
     startIdx = config['html']['start_idx']
     endIdx = config['html']['end_idx']
 
+    #Cover related variables
+    coverCount = config['xhtml']['cover_count']
+    coverImages = config['xhtml']['image_names']
+
     #Flags
     useStartEndIndices = config['html']['use_idx']
     chapterOnDifPage = config['xhtml']['chapter_on_dif_page']
     downloadImages = args.dlimages if args.dlimages else config['download']['download_images']
+    generateCover = config['xhtml']['generate_cover']
     
     #Starting index for xhtml files (Number of last premade file)
     fileNameFolder = config['create']['folder']
@@ -227,6 +232,17 @@ def main():
         newFile()
         if not afterImage:
             afterImage = True
+
+
+    #Cover page generator
+    if generateCover:
+        fileNameIndex = 0
+        for i in range(coverCount):
+            newFile()
+            with open(currentFilePath, 'a', encoding='utf-8') as output:
+                text = epub.xhtmlImage(coverImages[i])
+                output.write(text)
+
         
 
     #Main text parse loop
