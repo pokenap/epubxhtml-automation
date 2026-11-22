@@ -78,6 +78,7 @@ def xhtmlBody(bodyArr:Lines):
     return output
 
 def xhtmlImage(name:str,title=""):
+    """Generates an xhtml image block."""
     imageText = f'''<h2 class="block_9" id="toc_id_3"></h2>
         <p class="block_"><img src="../Images/{name}" alt="Image" class="calibre1"/></p>
         '''
