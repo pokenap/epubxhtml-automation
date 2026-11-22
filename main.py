@@ -1,3 +1,8 @@
+"""This is an epub xhtml file generator made by parsing text with identifiers and regex to create individual pages for chapters and images.
+The program's variables can be modified through the config.toml in the main directory.
+"""
+
+import ast
 import argparse
 import os
 import re
@@ -107,34 +112,39 @@ def main():
 
 
     #Source download
-    headers = config['download']['user_agent'] 
+    headers = ast.literal_eval(config['download']['user_agent'])
     sourceName = config['download']['source_name']
     sourceFullPath = sourcePath + '/' + sourceName
 
-    if pathOriginal is None:
+    #Check if a path was provided to a source file and if a file exists at that path
+    #If not download the source from the provided URL
+    if pathOriginal is None or pathOriginal == '' or not os.path.exists(pathOriginal):
         with open(sourceFullPath, 'wb') as file:
             response = requests.get(fullUrl, headers=headers)
             file.write(response.content)
         pathOriginal = sourceFullPath
-    
 
+    #Updated during runtime
     linesList = []
     afterImage = False
     
     #Helper Methods
     def filePathUpdate():
+        """Sets the current file path to the most recently created file."""
         nonlocal currentFilePath
         nonlocal fileNameIndex
         fileNameIndex += 1
         currentFilePath = './' + fileNameFolder + '/' + fileNameTemplate + f'{fileNameIndex:04}' + fileType
 
     def newFile():
+        """Creates a new file after writing any lines left in the queue to the working file."""
         writeCurrentQueue()
         filePathUpdate()
         with open(currentFilePath, 'x'):
             pass
     
     def writeCurrentQueue():
+        """Writes the current lines in the queue to the working file."""
         nonlocal linesList
         nonlocal afterImage
         if linesList:
@@ -150,6 +160,9 @@ def main():
             afterImage = False
 
     def downloadImage(url:str):
+        """Downloads an image from a given url.
+        Currently, hardcoded to search two levels of html for the image url.
+        """
         imageUrl = ''
         with tempfile.TemporaryFile(delete_on_close=False) as temp:
                 response = requests.get(url, headers=headers)
@@ -170,6 +183,7 @@ def main():
             file.write(response.content)
 
     def handleSamePageHeader(line):
+        """Generates a page with a header without closing the html allowing more text to be written."""
         nonlocal afterImage
         newFile()
         with open(currentFilePath, 'a', encoding='utf-8') as output:
@@ -180,6 +194,7 @@ def main():
             afterImage = False
 
     def handleSeparatePageHeader(line):
+        """Generates a page with a header and closes the html."""
         nonlocal afterImage
         newFile()
         with open(currentFilePath, 'a', encoding='utf-8') as output:
@@ -190,6 +205,7 @@ def main():
             afterImage = False
 
     def handleNoHeaderPage():
+        """Generates a page with no header without closing the html allowing more text to be written."""
         nonlocal afterImage
         newFile()
         with open(currentFilePath, 'a', encoding='utf-8') as output:
@@ -199,6 +215,7 @@ def main():
             afterImage = False
 
     def handleImagePage(line):
+        """Generates a page with an image and closes the html."""
         nonlocal afterImage
         if fullUrl and downloadImages:
             imageUrl = urlRoot + TextEditing.imageUrlFinder(line)
@@ -215,6 +232,7 @@ def main():
     #Main text parse loop
     with open(pathOriginal, 'r', encoding='utf-8') as source:
         startingLine = 0
+        #Use config index or make a single pass up to the provided start identifier.
         if not useStartEndIndices:
             for idx, line in enumerate(source):
                 if line.find(htmlStart) != -1 or line is None:
@@ -222,8 +240,11 @@ def main():
                     break
         else:
             startingLine = startIdx
-        
+
+        #Reset file pointer
         source.seek(0)
+
+        #Parse file line by line
         for idx, line in enumerate(source):
             if idx < startingLine:
                 continue
