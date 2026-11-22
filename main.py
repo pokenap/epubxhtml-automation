@@ -227,7 +227,7 @@ def main():
             downloadImage(imageUrl)
         newFile()
         with open(currentFilePath, 'a', encoding='utf-8') as output:
-            text = epub.xhtmlImage(TextEditing.nameFromUrl(TextEditing.imageUrlFinder(line)))
+            text = epub.xhtmlImage(TextEditing.nameFromUrl(TextEditing.imageUrlFinder(line)), title)
             output.write(text)
         newFile()
         if not afterImage:
@@ -240,7 +240,7 @@ def main():
         for i in range(coverCount):
             newFile()
             with open(currentFilePath, 'a', encoding='utf-8') as output:
-                text = epub.xhtmlImage(coverImages[i])
+                text = epub.xhtmlImage(coverImages[i], title)
                 output.write(text)
 
         
