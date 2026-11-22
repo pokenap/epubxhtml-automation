@@ -116,7 +116,9 @@ def main():
     sourceName = config['download']['source_name']
     sourceFullPath = sourcePath + '/' + sourceName
 
-    if pathOriginal is None or pathOriginal == '':
+    #Check if a path was provided to a source file and if a file exists at that path
+    #If not download the source from the provided URL
+    if pathOriginal is None or pathOriginal == '' or not os.path.exists(pathOriginal):
         with open(sourceFullPath, 'wb') as file:
             response = requests.get(fullUrl, headers=headers)
             file.write(response.content)

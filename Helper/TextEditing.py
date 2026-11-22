@@ -2,6 +2,7 @@
 Examples of such would be extracting text from html elements.
 """
 def htmlElementRemover(line:str):
+    """Extracts text from enclosed html elements."""
     readingText = False
     lastChar = ''
     output = ''
@@ -21,6 +22,7 @@ def htmlElementRemover(line:str):
     return output
 
 def chapterNameParser(line:str, separators:list[str]=[':']):
+    """Creates an array of names formed from the different parts of a chapter title."""
     names = []
     currentName = ''
     separatorIdx = 0
@@ -40,6 +42,7 @@ def chapterNameParser(line:str, separators:list[str]=[':']):
     return names
 
 def imageUrlFinder(line:str, start:int=0):
+    """Finds the URL for an image located in an href html element."""
     startingIdx = line.find('href=', start)
     readingUrl = False
     lastChar = ''
@@ -63,6 +66,7 @@ def imageUrlFinder(line:str, start:int=0):
     return output 
 
 def nameFromUrl(line:str):
+    """Finds the name of a file from the html element."""
     startingIdx = line.find('File:') + len('File:')
     output = ''
     for idx, char in enumerate(line):
